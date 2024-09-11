@@ -20,24 +20,71 @@ int main(void){
   Switch_Init();
   // Write something to declare required variables
   // Write something to initalize the state of the FSM, LEDs, and variables as needed
+	int state = 0;
 
+	
   while(1){
       // Write something using Switch_In() and LED_Out() to implement the behavior in the lab doc
+		if(Switch_In()) {
+			
+			//Clock_Delay1ms(10);
+			for(int hi = 0; hi < 100;) {
+				if(Switch_In()) {
+					hi++;
+				}
+			}
+			while(Switch_In()) {}
+			//Clock_Delay1ms(10);
+			for(int low = 0; low < 1000;) {
+				if(!Switch_In()) {
+					low++;
+				}
+			}
+			state++;
+			/*
+			if(state==1) {
+				LED_Out(0x04);
+			}
+			if(state==2) {
+				LED_Out(0x04);
+				LED_Out(0x02);
+			}
+			*/
+			if(state==3) {
+				LED_Out(0x01);
+				//LED_Out(0x02);
+				state = 0;
+			}
+		}
   } 
-} 
-
+}
+// F E D C B A
+// PE0
 void LED_Init(void){
+		SYSCTL_RCGCGPIO_R |= 0x10;
+		while((SYSCTL_RCGCGPIO_R) == 0) {};
+		GPIO_PORTE_DIR_R |= 0x01;
+		GPIO_PORTE_DEN_R |= 0x01;
     // Write something to initalize the GPIOs that drive the LEDs based on your EID as defined in the lab doc.
 }
 void LED_Out(uint32_t data){
     // write something that sets the state of the GPIO pin as required
+		GPIO_PORTE_DATA_R ^= data;
 }
+
+//     F E D C B A
+// 7 6 5 4 3 2 1 0
+// PC7
 void Switch_Init(void){
+		SYSCTL_RCGCGPIO_R |= 0x04;
+		while((SYSCTL_RCGCGPIO_R)==0) {}
+		GPIO_PORTC_DIR_R &= ~0x80;
+		GPIO_PORTC_DEN_R |= 0x80;
     // write something to initalize the GPIO that take input from the switches based on your EID as defined in the lab doc
 }
 uint32_t Switch_In(void){
   // write something that reads the state of the GPIO pin as required
-  return 42;
+  return (GPIO_PORTC_DATA_R&0x80);
 }
 
 void Clock_Delay(uint32_t ulCount){
